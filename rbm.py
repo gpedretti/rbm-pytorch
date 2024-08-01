@@ -4,6 +4,10 @@ import torch.nn.functional as F
 import torch.utils.data
 
 
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
 class RBM(nn.Module):
     r"""Restricted Boltzmann Machine.
 
@@ -21,10 +25,10 @@ class RBM(nn.Module):
         self.W = nn.Parameter(torch.randn(n_hid, n_vis))
         self.k = k
     
-    def sigmoid_only(mvm):
+    def sigmoid_only(self, mvm):
         return torch.sigmoid(mvm)
     
-    def sampling_only(p):
+    def sampling_only(self, p):
         return p.bernoulli()
     
     def visible_to_hidden(self, v):
@@ -38,22 +42,22 @@ class RBM(nn.Module):
 
         """
         mvm = F.linear(v, self.W, self.h)
-        p = sigmoid_only(mvm)
-        return sampling_only(p)
+        p = self.sigmoid_only(mvm)
+        return self.sampling_only(p)
 
     def hidden_to_visible(self, h):
         r"""Conditional sampling a visible variable given a hidden variable.
 
         Args:
-            h (Tendor): The hidden variable.
+            h (Tensor): The hidden variable.
 
         Returns:
             Tensor: The visible variable.
 
         """
         mvm = F.linear(h, self.W.t(), self.v)
-        p = sigmoid_only(mvm)
-        return sampling_only(p)
+        p = self.sigmoid_only(mvm)
+        return self.sampling_only(p)
 
     def free_energy(self, v):
         r"""Free energy function.

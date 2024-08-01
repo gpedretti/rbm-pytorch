@@ -20,7 +20,13 @@ class RBM(nn.Module):
         self.h = nn.Parameter(torch.randn(1, n_hid))
         self.W = nn.Parameter(torch.randn(n_hid, n_vis))
         self.k = k
-
+    
+    def sigmoid_only(mvm):
+        return torch.sigmoid(mvm)
+    
+    def sampling_only(p):
+        return p.bernoulli()
+    
     def visible_to_hidden(self, v):
         r"""Conditional sampling a hidden variable given a visible variable.
 
@@ -31,8 +37,9 @@ class RBM(nn.Module):
             Tensor: The hidden variable.
 
         """
-        p = torch.sigmoid(F.linear(v, self.W, self.h))
-        return p.bernoulli()
+        mvm = F.linear(v, self.W, self.h)
+        p = sigmoid_only(mvm)
+        return sampling_only(p)
 
     def hidden_to_visible(self, h):
         r"""Conditional sampling a visible variable given a hidden variable.
@@ -44,8 +51,9 @@ class RBM(nn.Module):
             Tensor: The visible variable.
 
         """
-        p = torch.sigmoid(F.linear(h, self.W.t(), self.v))
-        return p.bernoulli()
+        mvm = F.linear(h, self.W.t(), self.v)
+        p = sigmoid_only(mvm)
+        return sampling_only(p)
 
     def free_energy(self, v):
         r"""Free energy function.
